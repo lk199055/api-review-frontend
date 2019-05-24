@@ -29,10 +29,10 @@
                         <p>Or add a new API <a href ui-sref="api-item-new">HERE</a></p>
                     </div>
                 </div>
-                <div class="form-group">
+                <!--<div class="form-group">
                     <label for="description">Description</label>
                     <textarea name="description" id="description" class="form-control" ng-model="reviewEditorCtrl.review.description" rows="5"></textarea>
-                </div>
+                </div>-->
                 <div class="form-group">
                     <label for="content">Content</label>
                     <textarea ui-tinymce ng-model="reviewEditorCtrl.review.content" rows="20"></textarea>
@@ -80,17 +80,17 @@
             <!-- /well -->
             <div ng-if="reviewEditorCtrl.isEditMode" class="well">
                 <h4><i class="fa fa-info"></i> Review Info</h4>
-                <p>Date created: {{reviewEditorCtrl.review.datetime_created}}</p>
-                <p>Last updated: {{reviewEditorCtrl.review.last_updated}}</p>
-                <p>Total rated: {{reviewEditorCtrl.review.total_rated}}</p>
-                <p>Current rating: {{reviewEditorCtrl.review.current_rating}}</p>
+                <p>Date created: {{reviewEditorCtrl.review.created_at | date:'dd/MM/yyyy HH:mm:ss'}}</p>
+                <p>Last updated: {{reviewEditorCtrl.review.updated_at | date:'dd/MM/yyyy HH:mm:ss'}}</p>
+                <!--<p>Total rated: {{reviewEditorCtrl.review.total_rated}}</p>
+                <p>Current rating: {{reviewEditorCtrl.review.current_rating}}</p>-->
             </div>
             <!-- /well -->
             <div ng-if="reviewEditorCtrl.selectedApi" class="well">
                 <h4><i class="fa fa-info"></i> API Info</h4>
                 <p>Name: {{reviewEditorCtrl.selectedApi.originalObject.name}}</p>
-                <p>Homepage: <a ng-href="{{reviewEditorCtrl.selectedApi.originalObject.link}}" target="_blank">{{reviewEditorCtrl.selectedApi.originalObject.link}}</a></p>
-                <p>Description: {{reviewEditorCtrl.selectedApi.originalObject.description}}</p>
+                <p>Homepage: <a class="dont-break-out" ng-href="{{reviewEditorCtrl.selectedApi.originalObject.link}}" target="_blank">{{reviewEditorCtrl.selectedApi.originalObject.link}}</a></p>
+                <p>Description: {{reviewEditorCtrl.selectedApi.originalObject.description | limitTo:500}}</p>
             </div>
         </div>
     </div>

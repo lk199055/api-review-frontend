@@ -39,7 +39,7 @@
          */
         function search(query) {
             return $http({
-                url: APISERVICE.tagUrl + '?q=' + query,
+                url: APISERVICE.tagUrl + '?attr=name&val=' + query,
                 method: 'GET',
                 dataType: 'json',
                 data: '',

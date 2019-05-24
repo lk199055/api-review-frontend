@@ -18,6 +18,16 @@ module.exports = function(){
                 created_at: faker.date.past(),
                 rating: (faker.random.number()%5) + 1
             }
+        }),
+        api: _.times(10, function(n){
+          return {
+            id: n,
+            name: faker.commerce.productName(),
+            description: faker.lorem.paragraphs(),
+            link: faker.internet.url(),
+            created_at: faker.date.past(),
+            updated_at: faker.date.past()
+          }
         })
-    }
+    };
 }

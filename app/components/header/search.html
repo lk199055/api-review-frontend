@@ -1,10 +1,13 @@
-<div class="col-sm-5 col-md-5">
-    <form class="navbar-form navbar-left" role="search">
+<div class="col-sm-3 col-md-3">
+    <form class="navbar-form navbar-left" ng-submit="searchCtrl.searchSubmit()" role="search">
       <div class="input-group">
-        <input type="text" class="span6 form-control" placeholder="Search">
+        <input type="text" class="span6 form-control" placeholder="Search" ng-model="searchCtrl.query" required>
         <div class="input-group-btn">
-            <button type="submit" class="btn btn-default"><i class="fa fa-search fa-lg"></i></button>
+            <button type="submit" ng-disabled="search.$invalid || searchCtrl.dataLoading" class="btn btn-default"><i class="fa fa-search fa-lg"></i></button>
         </div>
       </div>
     </form>
+</div>
+<div class="nav navbar-nav adv-search">
+    <li><a ui-sref="search">Advance search</a></li>
 </div>

@@ -8,38 +8,37 @@
     /** @ngInject */
     function ratingservice($http, $q, APISERVICE, logger) {
         var service = {
-            addToReview: addToReview,
-            getByReview: getByReview
+            upvote: upvote,
+            downvote: downvote
         };
 
         return service;
         /////////////////////
 
         /**
-         * Add rating to a review
+         * Upvote a review
          * @param reviewId the id of the review
-         * @param rating the rating to be added to a review
          */
-        function addToReview(reviewId, rating) {
+        function upvote(reviewId) {
             return $http({
-                url: APISERVICE.reviewUrl + '/' + reviewId + '/ratings',
+                url: APISERVICE.reviewUrl + reviewId + '/upvote/',
                 method: 'POST',
                 dataType: 'json',
-                data: review,
+                data: {},
                 headers: APISERVICE.headers
             }).then(handleSuccess, handleError);
         }
 
         /**
-         * Retrieves ratings of a review
+         * Downvote a review
          * @param reviewId the id of the review
          */
-        function getByReview(reviewId) {
+        function downvote(reviewId) {
             return $http({
-                url: APISERVICE.reviewUrl + '/' + reviewId + '/ratings',
-                method: 'GET',
+                url: APISERVICE.reviewUrl + reviewId + '/downvote/',
+                method: 'POST',
                 dataType: 'json',
-                data: '',
+                data: {},
                 headers: APISERVICE.headers
             }).then(handleSuccess, handleError);
         }

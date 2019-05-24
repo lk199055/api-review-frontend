@@ -8,25 +8,32 @@
                 Our mission is blah blah blah.
             </p> -->
             <!-- facebook -->
-            <a class="facebook social button" href="" target="_blank" rel="nofollow">
+            <!--<a class="facebook social button" href="" target="_blank" rel="nofollow">
                 <span class="icon">
                     <i class="fa fa-facebook-official"></i>
                 </span>
                 Facebook
             </a>
             <!-- twitter -->
-            <a class="twitter social button" href="" target="_blank" rel="nofollow">
+            <!--<a class="twitter social button" href="" target="_blank" rel="nofollow">
                 <span class="icon">
                     <i class="fa fa-twitter"></i>
                 </span>
                 Twitter
             </a>
             <!-- google+ -->
-            <a class="google social button" href="" target="_blank" rel="nofollow">
+            <!--<a class="google social button" href="" target="_blank" rel="nofollow">
                 <span class="icon">
                     <i class="fa fa-google-plus-square"></i>
                 </span>
                 Google+
+            </a>
+            <!-- swagger -->
+            <a class="swagger social button" href="http://apioverload.herokuapp.com/" target="_blank" rel="nofollow">
+                <span class="icon">
+                    <img src="assets/img/swagger-40x40.png" />
+                </span>
+                Check out our API
             </a>
             <!-- newsletter -->
             <!-- <p>Subscribe to our newsletter for weekly updates.</p>
@@ -56,22 +63,19 @@
                 <div class="col-lg-4">
                     <h4>APIs</h4>
                     <ul class="side-nav">
-                        <li><a ui-sref="api-list">Browse APIs</a></li>
-                        <li><a href="">Search</a></li>
+                        <li><a ui-sref="api-list">Explore APIs</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-4">
                     <h4>Reviews</h4>
                     <ul class="side-nav">
-                        <li><a ui-sref="review-list">Browse reviews</a></li>
-                        <li><a href="">Search</a></li>
+                        <li><a ui-sref="review-list">Explore reviews</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-4">
                     <h4>Reviewers</h4>
                     <ul class="side-nav">
-                        <li><a ui-sref="user-list">Brower reviewers</a></li>
-                        <li><a href="">Search</a></li>
+                        <li><a ui-sref="user-list({type:'role',search:footerCtrl.USER_ROLES.REVIEWER})">Explore reviewers</a></li>
                     </ul>
                 </div>
             </div>

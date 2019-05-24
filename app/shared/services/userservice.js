@@ -16,7 +16,12 @@
             update: updateUser,
             delete: deleteUser,
             resetPassword: resetPassword,
-            activate: activate
+            searchByGivenName: searchByGivenName,
+            searchBySurname: searchBySurname,
+            searchByName: searchByName,
+            searchByEmail: searchByEmail,
+            searchByStatus: searchByStatus,
+            searchByRole: searchByRole
         };
 
         return service;
@@ -41,8 +46,9 @@
          * @param user a user object that captures all details the API needs
          */
         function register(user) {
+            user.role = "reader";
             return $http({
-                url: APISERVICE.userUrl + '/register',
+                url: APISERVICE.userUrl,
                 method: 'POST',
                 dataType: 'json',
                 data: user,
@@ -56,7 +62,7 @@
          */
         function getById(id) {
             return $http({
-                url: APISERVICE.userUrl + '/' + id,
+                url: APISERVICE.userUrl + id + '/',
                 method: 'GET',
                 dataType: 'json',
                 data: '',
@@ -72,7 +78,7 @@
          */
         function getPage(offset, limit, userType) {
             offset = typeof offset !== 'undefined' ? offset : 0;
-            limit = typeof limit !== 'undefined' ? limit : 20;
+            limit = typeof limit !== 'undefined' ? limit : session.getPageSize();
             var url = APISERVICE.userUrl + '?offset=' + offset + '&limit=' + limit;
             if (typeof userType !== 'undefined') {
                 url += '&userType=' + encodeURIComponent(userType);
@@ -108,12 +114,12 @@
          * Updates a user's profile
          * @param user the user object with updated information
          */
-        function updateUser(user) {
+        function updateUser(id, patch) {
             return $http({
-                url: APISERVICE.userUrl + '/' + user.id,
-                method: 'PUT',
+                url: APISERVICE.userUrl + id + '/',
+                method: 'PATCH',
                 dataType: 'json',
-                data: user,
+                data: patch,
                 headers: APISERVICE.headers
             }).then(handleSuccess, handleError);
         }
@@ -124,7 +130,7 @@
          */
         function deleteUser(id) {
             return $http({
-                url: APISERVICE.userUrl + '/' + id,
+                url: APISERVICE.userUrl + id + '/',
                 method: 'DELETE',
                 dataType: 'json',
                 data: '',
@@ -141,7 +147,7 @@
                 'email': email
             };
             return $http({
-                url: APISERVICE.userUrl + '/reset-password',
+                url: APISERVICE.userUrl + 'reset_password/',
                 method: 'POST',
                 dataType: 'json',
                 data: request,
@@ -150,17 +156,51 @@
         }
 
         /**
-         * Activates a user
-         * @param token the activation token
+         * Search Users
+         * @param query: String with query param
+         * @param attr: Attribute to search [given_name, surname,
+         *                        username, email, status]
+         * @param offset: Int page to start search
+         * @param limit: Int number of results per page
+         * @return object: Contains pagination info and list of User objects
          */
-        function activate(token) {
+        function search(query, attr, offset, limit) {
+            offset = !_.isUndefined(offset) ? offset : 0;
+            limit = !_.isUndefined(limit) ? limit : 10;
+            var urlData = '?attr=' + attr + '&val=' + encodeURIComponent(query)
+                + '&limit=' + limit
+                + '&offset=' + offset;
             return $http({
-                url: APISERVICE.userUrl + '/activate',
-                method: 'POST',
+                url: APISERVICE.userUrl + urlData,
+                method: 'GET',
                 dataType: 'json',
-                data: token,
+                data: '',
                 headers: APISERVICE.headers
             }).then(handleSuccess, handleError);
+        }
+
+        function searchByGivenName(query, offset, limit) {
+            return search(query, 'given_name', offset, limit);
+        }
+
+        function searchBySurname(query, offset, limit) {
+            return search(query, 'surname', offset, limit);
+        }
+
+        function searchByName(query, offset, limit) {
+            return search(query, 'name', offset, limit);
+        }
+
+        function searchByEmail(query, offset, limit) {
+            return search(query, 'email', offset, limit);
+        }
+
+        function searchByStatus(query, offset, limit) {
+            return search(query, 'status', offset, limit);
+        }
+
+        function searchByRole(query, offset, limit) {
+            return search(query, 'role', offset, limit);
         }
 
         // private functions

@@ -15,7 +15,7 @@
                 </div>
                 <div class="form-group required" ng-class="{ 'has-error': form.link.$touched && form.link.$invalid }">
                     <label for="link">Home Page</label>
-                    <input type="url" name="link" id="link" class="form-control" ng-model="apiEditorCtrl.api.content" required />
+                    <input type="url" name="link" id="link" class="form-control" ng-model="apiEditorCtrl.api.link" required />
                     <span ng-show="form.link.$touched && form.link.$error.required" class="help-block">Link is required</span>
                     <span ng-show="form.link.$touched && form.link.$error.url" class="help-block">Invalid url</span>
                 </div>
@@ -35,8 +35,8 @@
         <div id="api-sidebar" class="col-lg-4">
             <div ng-show="apiEditorCtrl.isEditMode" class="well">
                 <h4><i class="fa fa-info"></i> API Info</h4>
-                <p>Date created: {{apiEditorCtrl.api.datetime_created}}</p>
-                <p>Last updated: {{apiEditorCtrl.api.last_updated}}</p>
+                <p>Date created: {{apiEditorCtrl.api.created_at | date:'dd/MM/yyyy HH:mm:ss'}}</p>
+                <p>Last updated: {{apiEditorCtrl.api.updated_at | date:'dd/MM/yyyy HH:mm:ss'}}</p>
             </div>
             <!-- /well --><!--
             <div class="well">

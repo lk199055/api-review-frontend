@@ -6,8 +6,8 @@
         .controller('ApiEditorController', ApiEditorController);
 
     /** @ngInject */
-    function ApiEditorController($state, $stateParams, initData, dialogs, reviewservice,
-        apiservice, userservice, tagservice, ratingservice, session, toastr, logger) {
+    function ApiEditorController($state, $stateParams, dialogs, reviewservice,
+        apiservice, userservice, tagservice, ratingservice, session, toastr) {
         var vm = this;
 
         vm.isEditMode = ($state.current.name == 'api-item-edit');
@@ -41,7 +41,6 @@
 
         function submitAPI() {
             vm.dataLoading = true;
-            logger.log(vm.api);
             if (vm.isEditMode) {
                 apiservice.update(vm.api)
                     .then(updateAPISuccessful, submitAPIFailed);
@@ -67,8 +66,11 @@
         }
 
         function cancelEdit() {
-            $state.go('api-item-view', {id: vm.api.id});
-            logger.info('Editing cancelled');
+            if (vm.isEditMode) {
+                $state.go('api-item-view', {id: vm.api.id});
+            } else {
+                $state.go('home');
+            }
         }
     }
 })();

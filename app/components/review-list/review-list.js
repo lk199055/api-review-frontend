@@ -1,51 +1,46 @@
 (function() {
     'use strict';
+
     angular
         .module('app.reviewList')
         .controller('ReviewListController', ReviewListController);
-   
-    function ReviewListController(reviewservice, logger) {
-		var vm = this;
-		var offset = 2;
-		var limit = 100;
-		vm.PerPage = 20;
-		vm.count = 20;
-        reviewservice.getPage(1,100).then(function(data) {
-			vm.count = data.count;
-        	vm.reviews = data.result;
-	    	vm.currentPage = 1;
-			//select a page
-			vm.selectPage = function(selected) {
-				if(vm.currentPage!=selected){
-			  		vm.currentPage=selected;
-			  	    reviewservice.getPage(selected,100).then(function(data) { vm.reviews = data.result;});
-		    	}
-			};		
-           //handler previous page
-           vm.prevPage = function() { 
-           		if (vm.currentPage > 1) {
-           			vm.currentPage--;
-			  		reviewservice.getPage(vm.currentPage,100).then(function(data) { vm.reviews = data.result;});
-           		}
-           };
-           //handler next page
-           vm.nextPage = function() {
-           		if (vm.currentPage < vm.pageCount()) {
-           			vm.currentPage++;
-			    	reviewservice.getPage(vm.currentPage,100).then(function(data) { vm.reviews = data.result;});
-           	 	}
-        	};
-           
-           //count page number
-           vm.pageCount = function() {
-           	return Math.ceil(vm.count/vm.PerPage);
-           };
- 
-           //get each page number
-           vm.pageRange = [];
-           	for (var i=1; i<= vm.pageCount();i++) {
-           		vm.pageRange.push(i);
-           	}   
-		});      
-     }
+
+    /** @ngInject */
+    function ReviewListController($state, $stateParams, initData, reviewservice, session,
+        CONSTANTS) {
+        var vm = this;
+
+        vm.currentPage = typeof $stateParams.page !== 'undefined' ? $stateParams.page : 1;
+        vm.pageSize = session.getPageSize();
+        vm.availablePageSizes = CONSTANTS.AVAILABLE_PAGE_SIZES;
+        vm.doPaging = doPaging;
+        vm.onPageSizeChange = onPageSizeChange;
+        vm.clickTag = clickTag;
+
+        vm.totalNum = initData.count;
+        vm.reviews = initData.results;
+
+        if ($stateParams.search) {
+            vm.searchType = $stateParams.type;
+            vm.searchStr = $stateParams.search;
+        }
+
+        function doPaging(text, page) {
+            $state.go('review-list', {search: $stateParams.search, page: page});
+        }
+
+        function onPageSizeChange() {
+            session.setPageSize(vm.pageSize);
+            // go to first page
+            if (vm.currentPage != 1) {
+                $state.go('review-list', {search: $stateParams.search, page: 1});
+            } else {
+                $state.reload();
+            }
+        }
+
+        function clickTag(tagName) {
+          $state.go('review-list', {'search': tagName, type: 'tag', page: 1});
+        }
+    }
 })();

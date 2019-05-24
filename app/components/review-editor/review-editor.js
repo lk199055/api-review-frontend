@@ -6,33 +6,17 @@
         .controller('ReviewEditorController', ReviewEditorController);
 
     /** @ngInject */
-    function ReviewEditorController($state, $stateParams, dialogs, reviewservice,
-        apiservice, userservice, tagservice, ratingservice, session, toastr, logger) {
+    function ReviewEditorController($state, $stateParams, initData, dialogs, reviewservice,
+        apiservice, userservice, tagservice, ratingservice, session, toastr) {
         var vm = this;
+
+        vm.review = initData;
 
         vm.isEditMode = ($state.current.name == 'review-item-edit');
         vm.loadTags = loadTags;
         vm.showCreateTagDialog = showCreateTagDialog;
         vm.submit = submitReview;
         vm.cancel = cancelEdit;
-        vm.review = {
-            'title': '',
-            'content': '',
-            'description': '',
-            'api': {},
-            'tags': []
-        };
-
-        // Populate API info if API id found in url param
-        if (typeof $stateParams.api !== undefined) {
-            var api = session.getCurrentAPI();
-            if (api != null && api.id == $stateParams.api) {
-                vm.review.api = api;
-                vm.selectedApi = {
-                    'originalObject': api
-                };
-            }
-        }
 
         // Get all APIs for autocomplete
         vm.allApis = [];
@@ -42,35 +26,22 @@
 
         function getAllAPIsSuccess(result) {
             vm.allApis = result.results;
-            logger.log(vm.allApis);
         }
 
         function getAllAPIsFailed(result) {
         }
 
-        // Use review stored in session if valid when editing review
+        // Populate API info
         if (vm.isEditMode) {
-            vm.review = session.getCurrentReview();
-
-            if (vm.review == null || vm.review.id != $stateParams.id) {
-                reviewservice.getById($stateParams.id)
-                    .then(getReviewSuccessful, getReviewFailed);
-
-                function getReviewSuccessful(result) {
-                    vm.review = result;
-                    vm.selectedApi = {
-                        'originalObject': vm.review.api
-                    };
-                    session.setCurrentReview(vm.review);
-                }
-
-                function getReviewFailed(error) {
-                    $state.go('review-list');
-                    toastr.error('Failed to retrieve the review. Please try again.');
-                }
-            } else {
+            vm.selectedApi = {
+                'originalObject': vm.review.api
+            };
+        } else if (typeof $stateParams.api !== undefined) {
+            var api = session.getCurrentAPI();
+            if (api != null && api.id == $stateParams.api) {
+                vm.review.api = api;
                 vm.selectedApi = {
-                    'originalObject': vm.review.api
+                    'originalObject': api
                 };
             }
         }
@@ -115,27 +86,25 @@
 
         function submitReview() {
             vm.dataLoading = true;
-            logger.log(vm.review);
             var reviewObj = {
                 'title': vm.review.title,
                 'content': vm.review.content,
-                'description': vm.review.description,
-                'api': vm.review.api.id,
-                'tags': []
+                // 'description': vm.review.description,
+                'api_id': vm.review.api.id,
+                'tag_ids': []
             };
             angular.forEach(vm.review.tags, function(tag) {
-                reviewObj.tags.push(tag.id);
+                reviewObj.tag_ids.push(tag.id);
             });
             if (vm.isEditMode) {
                 reviewObj.id = vm.review.id;
                 reviewservice.update(reviewObj)
                     .then(updateReviewSuccessful, submitReviewFailed);
             } else {
-                reviewObj.api = vm.selectedApi.originalObject.id;
+                reviewObj.api_id = vm.selectedApi.originalObject.id;
                 reviewservice.create(reviewObj)
                     .then(createReviewSuccessful, submitReviewFailed);
             }
-            logger.log(reviewObj);
 
             function createReviewSuccessful(result) {
                 $state.go('review-item-view', {id: result.id});
@@ -154,8 +123,11 @@
         }
 
         function cancelEdit() {
-            $state.go('review-item-view', {id: vm.review.id});
-            logger.info('Editing cancelled');
+            if (vm.isEditMode) {
+                $state.go('review-item-view', {id: vm.review.id});
+            } else {
+                $state.go('home');
+            }
         }
     }
 })();

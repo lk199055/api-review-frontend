@@ -8,9 +8,20 @@
                 restrict: 'E',
                 templateUrl: 'app/components/header/search.html',
                 controllerAs: 'searchCtrl',
-                controller: function() {
-
-                }
+                controller: SearchController
             };
         });
+
+    /** @ngInject */
+    function SearchController($state, reviewservice) {
+        var vm = this;
+        vm.searchSubmit = searchSubmit;
+        function searchSubmit() {
+            $state.go('review-list', {
+                'search': vm.query,
+                'type': 'title',
+                page: 1
+            });
+        }
+    }
 })();

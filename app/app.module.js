@@ -13,6 +13,8 @@
             'angucomplete-alt',
             'ngTagsInput',
             'app.services',
+            'app.filters',
+            'app.error',
             'app.header',
             'app.footer',
             'app.login',
@@ -25,13 +27,17 @@
             'app.review',
             'app.reviewEditor',
             'app.reviewList',
+            'app.myReviewList',
             'app.userProfile',
             'app.userProfileEditor',
-            'app.userList'
+            'app.userList',
+            'app.search',
+            'app.adminConsole'
         ])
         .run(run);
 
-    function run($rootScope, $state, $cookieStore, authservice, session, toastr) {
+    function run($rootScope, $state, $cookieStore, authservice, session, toastr, logger) {
+        logger.info('Refreshed');
         // keep user logged in after page refresh
         if ($cookieStore.get('currentUser')) {
             session.create($cookieStore.get('currentUser'));
@@ -41,25 +47,48 @@
         }
 
         $rootScope.stateIsLoading = false;
-        $rootScope.$on('$stateChangeStart', function() {
-            $rootScope.stateIsLoading = true;
+        $rootScope.$on('$stateChangeStart', function (evt, toState, toParams) {
+            if (toState.data.requireLogin && !authservice.isAuthenticated()) {
+                evt.preventDefault();
+                $state.go('login');
+                toastr.info('Please log in first.');
+            } else if (toState.data.authorisedRoles && !authservice.isAuthorised(toState.data.authorisedRoles)) {
+                evt.preventDefault();
+                $state.go('error', {type: 'forbidden'});
+            } else {
+                $rootScope.stateIsLoading = true;
+            }
         });
         $rootScope.$on('$stateChangeSuccess', function() {
             $rootScope.stateIsLoading = false;
         });
         $rootScope.$on('$stateChangeError', function (evt, toState, toParams, fromState, fromParams, error) {
-            if (angular.isObject(error) && angular.isString(error.code)) {
+            $rootScope.stateIsLoading = false;
+            evt.preventDefault();
+            if (angular.isObject(error)) {
                 switch (error.code) {
-                    case 'NOT_AUTHENTICATED':
+                    case 401:
                         // go to the login page
                         $state.go('login');
+                        toastr.info('Session expired. Please login again.');
+                        break;
+                    case 403:
+                        // go to the error page
+                        $state.go('error', {type: 'forbidden'});
+                        break;
+                    case 404:
+                        // go to the error page
+                        $state.go('error', {type: 'not-found'});
+                        break;
+                    case 500:
+                        // go to the error page
+                        $state.go('error', {type: 'server'});
                         break;
                     default:
-                        // set the error object on the error state and go there
-                        $state.get('error').error = error;
-                        $state.go('error');
                 }
-                toastr.error(error.message);
+                if (error.message) {
+                    toastr.error(error.message);
+                }
             }
             else {
                 // unexpected error

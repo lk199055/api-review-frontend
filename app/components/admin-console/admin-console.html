@@ -1,0 +1,32 @@
+<!-- Page Content -->
+<div class="container">
+
+    <div class="col-md-6 col-md-offset-3">
+        <h2>Change User Role</h2>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <form name="form" ng-submit="adminConsoleCtrl.changeRole()" role="form" novalidate>
+                    <div class="form-group" ng-class="{ 'has-error': form.user.$touched && form.user.$invalid }">
+                        <label for="user">User ID</label>
+                        <input type="text" name="user" id="user" class="form-control" ng-model="adminConsoleCtrl.userId" required />
+                        <span ng-show="form.user.$touched && form.user.$error.required" class="help-block">User ID is required</span>
+                    </div>
+                    <div class="form-group" ng-class="{ 'has-error': form.role.$touched && form.role.$invalid }">
+                        <label for="role">Role</label>
+                        <select  name="role" id="role" class="form-control" ng-model="adminConsoleCtrl.role" required>
+                            <option ng-repeat="userRole in adminConsoleCtrl.USER_ROLES" value="{{userRole}}">{{userRole}}</option>
+                        </select>
+                        <!-- <input type="text" name="role" id="role" class="form-control" ng-model="adminConsoleCtrl.role" required /> -->
+                        <span ng-show="form.role.$touched && form.role.$error.required" class="help-block">Role is required</span>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" ng-disabled="form.$invalid || adminConsoleCtrl.dataLoading" class="btn btn-primary">Submit</button>
+                        <img ng-if="adminConsoleCtrl.dataLoading" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!-- /.container -->

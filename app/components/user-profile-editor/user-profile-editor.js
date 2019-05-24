@@ -6,7 +6,7 @@
         .controller('UserProfileEditorController', UserProfileEditorController);
 
     /** @ngInject */
-    function UserProfileEditorController($state, dialogs, userservice, session, toastr, logger) {
+    function UserProfileEditorController($state, dialogs, userservice, session, toastr) {
         var vm = this;
 
         vm.showChangePasswordDialog = showChangePasswordDialog;
@@ -21,10 +21,10 @@
                 {});
             dlg.result.then(updateUserProfile, cancel);
 
-            function updateUserProfile(newPassword) {
+            function updateUserProfile(passwords) {
                 // make a another copy so that changes in the form are not submitted
                 var user = angular.copy(session.getCurrentUser());
-                user.new_password = newPassword;
+                user.password = passwords.newPassword;
                 userservice.update(user)
                     .then(changePasswordSuccessful, changePasswordFailed);
 
@@ -44,7 +44,6 @@
 
         function submitUserProfile() {
             vm.dataLoading = true;
-            logger.log(vm.currentUser);
             userservice.update(vm.currentUser)
                     .then(updateUserProfileSuccessful, updateUserProfileFailed);
 

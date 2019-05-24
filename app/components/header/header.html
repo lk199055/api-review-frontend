@@ -22,8 +22,8 @@
                         <li ng-repeat="opt in headerCtrl.contentMenu"><a ui-sref="{{opt.link}}">{{opt.title}}</a></li>
                     </ul>
                 </li>
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Create <span class="caret"></span></a>
+                <li access="{{headerCtrl.USER_ROLES.ADMIN}}, {{headerCtrl.USER_ROLES.EDITOR}}, {{headerCtrl.USER_ROLES.REVIEWER}}" class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Add <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li ng-repeat="opt in headerCtrl.createMenu"><a ui-sref="{{opt.link}}">{{opt.title}}</a></li>
                     </ul>
@@ -33,10 +33,10 @@
                 <li ng-show="headerCtrl.authservice.isAuthenticated()" class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{headerCtrl.session.getCurrentUser().given_name}} <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a ui-sref="admin">Admin console</a></li>
-                        <li role="separator" class="divider"></li>
-                        <li ng-repeat="opt in headerCtrl.userMenu"><a ui-sref="{{opt.link}}">{{opt.title}}</a></li>
-                        <li role="separator" class="divider"></li>
+                        <li access="{{headerCtrl.USER_ROLES.ADMIN}}"><a href ui-sref="admin-console">Admin console</a></li>
+                        <li access="{{headerCtrl.USER_ROLES.ADMIN}}" role="separator" class="divider"></li>
+                        <li access="{{headerCtrl.USER_ROLES.ADMIN}}, {{headerCtrl.USER_ROLES.EDITOR}}, {{headerCtrl.USER_ROLES.REVIEWER}}" ng-repeat="opt in headerCtrl.userMenu"><a ui-sref="{{opt.link}}">{{opt.title}}</a></li>
+                        <li access="{{headerCtrl.USER_ROLES.ADMIN}}, {{headerCtrl.USER_ROLES.EDITOR}}, {{headerCtrl.USER_ROLES.REVIEWER}}" role="separator" class="divider"></li>
                         <li><a href ng-click="headerCtrl.logout()">Logout</a></li>
                     </ul>
                 </li>

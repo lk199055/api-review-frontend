@@ -87,6 +87,14 @@
     background: #dd4b39;
 }
 
+.footer-site .social.button.swagger {
+    background: #83BE55;
+}
+
+.footer-site .social.button.swagger img {
+    padding-top: 3px;
+}
+
 .footer .form-group {
     margin-top: 35px;
     margin-bottom: 22px;

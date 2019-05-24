@@ -7,3 +7,5 @@ tmp
 libs/.DS_Store
 logs/*
 vendor/*
+.tags
+.tags1

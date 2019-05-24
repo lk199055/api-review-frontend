@@ -6,12 +6,13 @@
         .factory('authservice', authservice);
 
     /** @ngInject */
-    function authservice($http, $q, session, logger, APISERVICE) {
+    function authservice($http, $q, session, USER_ROLES, APISERVICE, logger) {
         var service = {
             login: login,
             logout: logout,
             isAuthenticated: isAuthenticated,
-            isAuthorised: isAuthorised
+            isAuthorised: isAuthorised,
+            belongsTo: belongsTo
         };
 
         return service;
@@ -23,23 +24,22 @@
          */
         function login(credentials) {
             return $http({
-                url: APISERVICE.url + '/login',
+                url: APISERVICE.userUrl + 'authenticate/',
                 method: 'POST',
-                dataType: 'json',
                 data: credentials,
                 headers: APISERVICE.headers
             }).then(loginComplete, loginFailed);
 
             function loginComplete(response) {
                 var user = response.data;
-                session.create(user);
                 var authdata = Base64.encode(credentials.email + ':' + credentials.password);
-                $http.defaults.headers.common['Authorization'] = 'Basic ' + authdata;
+                user.basicAuth = 'Basic ' + authdata;
+                session.create(user);
                 logger.success(
                     'User ' + user.email + ' successfully logged in',
                     response,
                     'authservice.login');
-                return $q.resolve(response);
+                return $q.resolve(user);
             }
 
             function loginFailed(response) {
@@ -91,20 +91,43 @@
             // }
         }
 
+        /**
+         * Checks if the current user is logged in
+         */
         function isAuthenticated() {
             return !!session.getCurrentUser();
         }
 
+        /**
+         * Checks if the current user's role belongs to a set of roles
+         * @param roles an array of user roles
+         */
         function isAuthorised(roles) {
+            if (roles == USER_ROLES.ALL) {
+                return true;
+            }
             if (!angular.isArray(roles)) {
               roles = [roles];
             }
             return service.isAuthenticated()
                 && roles.indexOf(session.getUserRole()) !== -1;
         }
+
+        /**
+         * Checks if the current user belongs to a list of users
+         * @param users an array of user ids
+         */
+        function belongsTo(users) {
+            if (!angular.isArray(users)) {
+                users = [users];
+            }
+            return service.isAuthenticated()
+                && (users.indexOf(session.getCurrentUser().id) !== -1
+                    || users.indexOf('' + session.getCurrentUser().id) !== -1);
+        }
     }
 
-    // Base64 encoding service used by AuthenticationService
+    // Base64 encoding service used by authservice
     var Base64 = {
 
         keyStr: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=',

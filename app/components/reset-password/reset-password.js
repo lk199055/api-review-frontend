@@ -5,7 +5,8 @@
         .module('app.resetPassword')
         .controller('ResetPasswordController', ResetPasswordController);
 
-    function ResetPasswordController($state, userservice, toastr, logger) {
+    /** @ngInject */
+    function ResetPasswordController($state, userservice, toastr) {
         var vm = this;
 
         vm.resetPassword = resetPassword;

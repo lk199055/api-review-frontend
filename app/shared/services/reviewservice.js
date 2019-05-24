@@ -6,7 +6,7 @@
         .factory('reviewservice', reviewservice);
 
     /** @ngInject */
-    function reviewservice($http, $q, APISERVICE, logger) {
+    function reviewservice($http, $q, APISERVICE, session, logger) {
         var service = {
             create: createReview,
             getById: getById,
@@ -16,7 +16,9 @@
             getAll: getAll,
             update: updateReview,
             delete: deleteReview,
-            searchByKeyword: searchByKeyword
+            searchByKeyword: searchByKeyword,
+            searchByTitle: searchByTitle,
+            searchByTag: searchByTag
         };
 
         return service;
@@ -42,7 +44,7 @@
          */
         function getById(id) {
             return $http({
-                url: APISERVICE.reviewUrl + '/' + id,
+                url: APISERVICE.reviewUrl + id + '/',
                 method: 'GET',
                 dataType: 'json',
                 data: '',
@@ -54,9 +56,11 @@
          * Retrieves reviews about an API
          * @param apiId the id of the API
          */
-        function getByAPI(apiId) {
+        function getByAPI(apiId, offset, limit) {
+            offset = typeof offset !== 'undefined' ? offset : 0;
+            limit = typeof limit !== 'undefined' ? limit : session.getPageSize();
             return $http({
-                url: APISERVICE.apiUrl + '/' + apiId + '/reviews',
+                url: APISERVICE.apiUrl + apiId + '/reviews/?offset=' + offset + '&limit=' + limit,
                 method: 'GET',
                 dataType: 'json',
                 data: '',
@@ -68,9 +72,11 @@
          * Retrieves reviews written by a reviewer
          * @param reviewerId the id of the reviewer
          */
-        function getByReviewer(reviewerId) {
+        function getByReviewer(reviewerId, offset, limit) {
+            offset = typeof offset !== 'undefined' ? offset : 0;
+            limit = typeof limit !== 'undefined' ? limit : session.getPageSize();
             return $http({
-                url: APISERVICE.userUrl + '/' + reviewerId + '/reviews',
+                url: APISERVICE.userUrl + reviewerId + '/reviews/?offset=' + offset + '&limit=' + limit,
                 method: 'GET',
                 dataType: 'json',
                 data: '',
@@ -85,7 +91,7 @@
          */
         function getPage(offset, limit) {
             offset = typeof offset !== 'undefined' ? offset : 0;
-            limit = typeof limit !== 'undefined' ? limit : 20;
+            limit = typeof limit !== 'undefined' ? limit : session.getPageSize();
             return $http({
                 url: APISERVICE.reviewUrl + '?offset=' + offset + '&limit=' + limit,
                 method: 'GET',
@@ -114,7 +120,7 @@
          */
         function updateReview(review) {
             return $http({
-                url: APISERVICE.reviewUrl + '/' + review.id,
+                url: APISERVICE.reviewUrl + review.id + '/',
                 method: 'PUT',
                 dataType: 'json',
                 data: review,
@@ -128,7 +134,7 @@
          */
         function deleteReview(id) {
             return $http({
-                url: APISERVICE.reviewUrl + '/' + id,
+                url: APISERVICE.reviewUrl + id + '/',
                 method: 'DELETE',
                 dataType: 'json',
                 data: '',
@@ -142,7 +148,43 @@
          */
         function searchByKeyword(keyword) {
             return $http({
-                url: APISERVICE.reviewUrl + '/search?q=' + encodeURIComponent(keyword),
+                url: APISERVICE.reviewUrl + '?attr=keyword&val=' + encodeURIComponent(keyword),
+                method: 'GET',
+                dataType: 'json',
+                data: '',
+                headers: APISERVICE.headers
+            }).then(handleSuccess, handleError);
+        }
+
+        /**
+         * Search Reviews
+         * @param query: String with query param
+         * @param offset: Int page to start search
+         * @param limit: Int number of results per page
+         * @return object: Contains pagination info and list of Review objects
+         */
+        function searchByTitle(query, offset, limit) {
+          offset = !_.isUndefined(offset) ? offset : 0;
+          limit = !_.isUndefined(limit) ? limit : 10;
+          var urlData = '?attr=title&val=' + encodeURIComponent(query)
+            + '&limit=' + limit
+            + '&offset=' + offset;
+          return $http({
+            url: APISERVICE.reviewUrl + urlData,
+            method: 'GET',
+            dataType: 'json',
+            data: '',
+            headers: APISERVICE.headers
+          }).then(handleSuccess, handleError);
+        }
+
+        /**
+         * Searches a review by tag
+         * @param tag the tag used to search
+         */
+        function searchByTag(tag) {
+            return $http({
+                url: APISERVICE.reviewUrl + '?attr=tag&val=' + encodeURIComponent(tag),
                 method: 'GET',
                 dataType: 'json',
                 data: '',

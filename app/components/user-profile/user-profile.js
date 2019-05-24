@@ -5,13 +5,13 @@
         .module('app.userProfile')
         .controller('UserProfileController', UserProfileController);
 
-    function UserProfileController($state,initData,dialogs, userservice, reviewservice,
-        toastr, logger) {
+    /** @ngInject */
+    function UserProfileController($state, initData) {
         var vm = this;
 
         vm.user = initData;
         vm.reload = function () {
-        $state.reload();
+            $state.reload();
         }
     }
 })();

@@ -5,6 +5,7 @@
         .module('app.reviewEditor')
         .controller('CreateTagDialogController', CreateTagDialogController);
 
+    /** @ngInject */
     function CreateTagDialogController($scope, $modalInstance) {
         //-- Variables --//
         $scope.tag = {

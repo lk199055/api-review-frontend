@@ -5,7 +5,8 @@
         .module('app.register')
         .controller('RegisterController', RegisterController);
 
-    function RegisterController($state, userservice, toastr, logger) {
+    /** @ngInject */
+    function RegisterController($state, userservice, toastr) {
         var vm = this;
 
         vm.register = register;

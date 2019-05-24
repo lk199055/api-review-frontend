@@ -1,0 +1,23 @@
+<!-- Page Content -->
+<div class="container">
+  <hgroup class="mb20">
+      <h1>Advance Search</h1>
+  </hgroup>
+
+  <form class="form-inline" name="advance_search" ng-submit="advance_search.$valid && searchCtrl.searchSubmit()">
+    <div class="form-group search-line">
+      <input type="text" class="span6 form-control search-box" placeholder="Search" ng-model="searchCtrl.query" required>
+      <select class="span4 form-control search-options" ng-model="searchCtrl.objectType" ng-change="searchCtrl.populateAttributes()" required>
+        <option value="api">API</option>
+        <option value="review">Review</option>
+        <option value="user">User</option>
+      </select>
+      <select class="form-control search-options" ng-model="searchCtrl.objectAttr" ng-show="searchCtrl.objectAttrOptions.length"
+        ng-options="opt.val as opt.txt for opt in searchCtrl.objectAttrOptions"></select>
+      <div class="input-group-btn search-btn">
+          <button type="submit" ng-disabled="searchCtrl.$invalid || searchCtrl.dataLoading" class="btn btn-default"><i class="fa fa-search fa-lg"></i></button>
+      </div>
+    </div>
+  </form>
+</div>
+<!-- /.container -->

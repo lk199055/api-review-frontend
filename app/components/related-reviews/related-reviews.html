@@ -1,0 +1,16 @@
+<div class="related-reviews well">
+    <h4><i class="fa fa-files-o"></i> Reviews</h4>
+    <ul ng-if="relatedReviews && relatedReviews.length > 0">
+        <li ng-repeat="article in relatedReviews">
+            <a href ui-sref="review-item-view({id:article.id})">{{article.title}}</a>
+        </li>
+    </ul>
+    <div ng-if="!relatedReviews || relatedReviews.length <= 0">
+        <p>No reviews found.
+            <a ng-if="api" href ui-sref="review-item-new({api: api})">Create one now</a>
+            <a ng-if="reviewer" href ui-sref="review-item-new">Create one now</a>
+        </p>
+    </div>
+    <a ng-if="relatedReviews && relatedReviews.length > 0" class="more" href ui-sref="review-list">More...</a>
+</div>
+<!-- /well -->

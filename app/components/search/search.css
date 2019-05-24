@@ -1,0 +1,15 @@
+.search-line {
+  width:100%;
+}
+
+.search-box {
+  width: 65% !important;
+}
+
+.search-options {
+  width:15% !important;
+}
+
+.search-btn {
+  display: inline-block;
+}

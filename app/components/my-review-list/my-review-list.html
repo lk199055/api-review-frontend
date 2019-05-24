@@ -1,0 +1,66 @@
+<div id="container" class="container">
+
+    <hgroup class="mb20">
+        <h1>My Reviews</h1>
+        <h2 class="lead" ng-if="myReviewListCtrl.reviews.length <= 0"><strong class="text-danger">You haven't created any reviews</strong></span></h2>
+    </hgroup>
+
+    <div class="row" ng-if="myReviewListCtrl.reviews.length > 0">
+        <div class="col-xs-12 col-sm-12 col-md-10">
+            <paging
+                class="small"
+                page="myReviewListCtrl.currentPage"
+                page-size="myReviewListCtrl.pageSize"
+                total="myReviewListCtrl.totalNum"
+                scroll-top="true"
+                hide-if-empty="true"
+                show-prev-next="true"
+                paging-action="myReviewListCtrl.doPaging('Paging Clicked', page)">
+            </paging>
+        </div>
+        <div class="col-xs-12 col-sm-12 col-md-2">
+            <span>Number of results</span>
+            <select ng-options="pageSize for pageSize in myReviewListCtrl.availablePageSizes" ng-model="myReviewListCtrl.pageSize" ng-change="myReviewListCtrl.onPageSizeChange()" class="form-control">
+            </select>
+        </div>
+    </div>
+    <section ng-if="myReviewListCtrl.reviews.length > 0" ng-repeat="review in myReviewListCtrl.reviews" class="col-xs-12 col-sm-6 col-md-12">
+        <div class="search-result row">
+            <div class="col-xs-12 col-sm-12 col-md-7 col-left">
+                <h3><a ui-sref="review-item-view({id:review.id})" title="">{{review.title}}</a></h3>
+                <p>{{review.content | htmlToPlaintext | limitTo:300}}...</p>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-1 col-left">
+                <p><a ui-sref="review-item-edit({id:review.id})">Edit</a></p>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-4 col-right">
+                <ul class="meta-search">
+                    <li><i class="fa fa-calendar-plus-o"></i> <span>Date created: {{review.created_at | date:'dd/MM/yyyy HH:mm:ss'}}</span></li>
+                    <li><i class="fa fa-calendar"></i> <span>Last updated: {{review.updated_at | date:'dd/MM/yyyy HH:mm:ss'}}</span></li>
+                </ul>
+            </div>
+            <span class="clearfix borda"></span>
+        </div>
+    </section>
+    <div>
+        <paging
+            class="small"
+            page="myReviewListCtrl.currentPage"
+            page-size="myReviewListCtrl.pageSize"
+            total="myReviewListCtrl.totalNum"
+            scroll-top="true"
+            hide-if-empty="true"
+            show-prev-next="true"
+            paging-action="myReviewListCtrl.doPaging('Paging Clicked', page)">
+        </paging>
+    </div>
+    <div class="scrollTopButton" id="scrollTopButton" style="display:none">
+        TOP
+    </div>
+    <div class="scrollBotButton" id="scrollBotButton" style="display:none">
+        BOTTOM
+    </div>
+</div>
+<!--Container-->
+
+<script type="text/javascript" src="assets/js/scroll.js"></script>

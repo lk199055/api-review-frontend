@@ -13,7 +13,8 @@
             getPage: getPage,
             getAll: getAll,
             update: updateAPI,
-            delete: deleteAPI
+            delete: deleteAPI,
+            search: searchAPI
         };
 
         return service;
@@ -39,7 +40,7 @@
          */
         function getById(id) {
             return $http({
-                url: APISERVICE.apiUrl + '/' + id,
+                url: APISERVICE.apiUrl + id + '/',
                 method: 'GET',
                 dataType: 'json',
                 data: '',
@@ -83,7 +84,7 @@
          */
         function updateAPI(api) {
             return $http({
-                url: APISERVICE.apiUrl + '/' + api.id,
+                url: APISERVICE.apiUrl + api.id + '/',
                 method: 'PUT',
                 dataType: 'json',
                 data: api,
@@ -97,12 +98,34 @@
          */
         function deleteAPI(id) {
             return $http({
-                url: APISERVICE.apiUrl + '/' + id,
+                url: APISERVICE.apiUrl + id + '/',
                 method: 'DELETE',
                 dataType: 'json',
                 data: '',
                 headers: APISERVICE.headers
             }).then(handleSuccess, handleError);
+        }
+
+        /**
+         * Search APIs
+         * @param query: String with query param
+         * @param offset: Int page to start search
+         * @param limit: Int number of results per page
+         * @return object: Contains pagination info and list of API objects
+         */
+        function searchAPI(query, offset, limit) {
+          offset = !_.isUndefined(offset) ? offset : 0;
+          limit = !_.isUndefined(limit) ? limit : 10;
+          var urlData = '?attr=name&val=' + encodeURIComponent(query)
+            + '&limit=' + limit
+            + '&offset=' + offset;
+          return $http({
+            url: APISERVICE.apiUrl + urlData,
+            method: 'GET',
+            dataType: 'json',
+            data: '',
+            headers: APISERVICE.headers
+          }).then(handleSuccess, handleError);
         }
 
         // private functions

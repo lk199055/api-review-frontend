@@ -6,8 +6,9 @@
         .controller('ApiController', ApiController);
 
     /** @ngInject */
-    function ApiController($state, initData, dialogs, apiservice, session, toastr, logger) {
+    function ApiController($state, initData, dialogs, apiservice, session, USER_ROLES, toastr) {
         var vm = this;
+        vm.USER_ROLES = USER_ROLES;
 
         vm.api = initData;
 		session.setCurrentAPI(vm.api);
@@ -33,11 +34,10 @@
             }
 
             function cancel(btn) {
-                logger.info('Delete API cancelled');
             }
         }
 
-		vm.reload = function () {
+		    vm.reload = function () {
             $state.reload();
         }
     }

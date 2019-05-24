@@ -37,7 +37,20 @@
         // }
 
         this.getUserRole = function () {
-            return this.currentUser ? this.currentUser.user_role : '';
+            return this.currentUser ? this.currentUser.role : '';
+        }
+
+        // Basic Auth
+        this.getBasicAuth = function () {
+            if (this.currentUser) {
+                return this.currentUser.basicAuth;
+            } else {
+                return null;
+            }
+        }
+
+        this.setBasicAuth = function(authData) {
+            this.currentUser.basicAuth = authData;
         }
 
         // Current api

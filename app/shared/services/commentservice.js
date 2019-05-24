@@ -24,9 +24,9 @@
          * Creates a new comment
          * @param comment a comment object that captures all details the API needs
          */
-        function createComment(comment) {
+        function createComment(reviewId, comment) {
             return $http({
-                url: APISERVICE.commentUrl,
+                url: APISERVICE.reviewUrl + reviewId + '/comments/',
                 method: 'POST',
                 dataType: 'json',
                 data: comment,
@@ -40,7 +40,7 @@
          */
         function getById(id) {
             return $http({
-                url: APISERVICE.commentUrl + '/' + id,
+                url: APISERVICE.commentUrl + id + '/',
                 method: 'GET',
                 dataType: 'json',
                 data: '',
@@ -53,7 +53,7 @@
          */
         function getByReview(reviewId) {
             return $http({
-                url: APISERVICE.reviewUrl + '/' + reviewId + '/comments',
+                url: APISERVICE.reviewUrl + reviewId + '/comments/',
                 method: 'GET',
                 dataType: 'json',
                 data: '',
@@ -97,7 +97,7 @@
          */
         function updateComment(comment) {
             return $http({
-                url: APISERVICE.commentUrl + '/' + comment.id,
+                url: APISERVICE.commentUrl + comment.id + '/',
                 method: 'PUT',
                 dataType: 'json',
                 data: comment,
@@ -111,7 +111,7 @@
          */
         function deleteComment(id) {
             return $http({
-                url: APISERVICE.commentUrl + '/' + id,
+                url: APISERVICE.commentUrl + id + '/',
                 method: 'DELETE',
                 dataType: 'json',
                 data: '',

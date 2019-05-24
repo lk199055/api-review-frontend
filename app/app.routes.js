@@ -44,7 +44,7 @@
         };
     }
 
-    function stateConfig($locationProvider, $stateProvider, $urlRouterProvider, $uiViewScrollProvider) {
+    function stateConfig($locationProvider, $stateProvider, $uiViewScrollProvider, USER_ROLES) {
         $locationProvider.html5Mode({
             enabled: false, // set to true to remove hash. Don't want to set it now because it
                             // doesn't allow access to pages by typing url directly
@@ -54,26 +54,56 @@
         $stateProvider
             .state('home', {
                 url: '/',
+                data: {
+                    requireLogin: false
+                },
                 views: getUICompObj('home'),
             })
             .state('login', {
                 url: '/login',
+                data: {
+                    requireLogin: false
+                },
                 views: getUICompObj('login'),
             })
             .state('register', {
                 url: '/register',
+                data: {
+                    requireLogin: false
+                },
                 views: getUICompObj('register'),
             })
             .state('reset-password', {
                 url: '/reset-password',
+                data: {
+                    requireLogin: false
+                },
                 views: getUICompObj('reset-password'),
             })
             .state('review-item-new', {
                 url: '/reviews/new?api',
-                views: getUICompObj('review-editor'),
+                data: {
+                    requireLogin: true,
+                    authorisedRoles: [USER_ROLES.ADMIN, USER_ROLES.EDITOR, USER_ROLES.REVIEWER]
+                },
+                views: getUICompObj('review-editor', undefined, undefined, {
+                    initData: function () {
+                        return {
+                            'title': '',
+                            'content': '',
+                            'description': '',
+                            'api': {},
+                            'tags': []
+                        };
+                    }
+                }),
             })
             .state('review-item-view', {
                 url: '/reviews/:id',
+                data: {
+                    requireLogin: true,
+                    authorisedRoles: [USER_ROLES.ALL]
+                },
                 views: getUICompObj('review', undefined, undefined, {
                     initData: function ($q, $stateParams, reviewservice, commentservice) {
                         var review = {};
@@ -85,31 +115,152 @@
                             .then(function (result) {
                                 review.comments = result.results;
                                 return review;
-                            }, getReviewFailed);
+                            }, getCommentsFailed);
 
                         function getReviewFailed(error) {
                             return $q.reject({
-                                code: 'NOT_FOUND',
-                                message: 'Failed to retrieve review.'
+                                code: error.status,
+                                message: error.data.detail
                             });
+                        }
+
+                        function getCommentsFailed(error) {
+                            return $q.reject(error);
                         }
                     }
                 }),
             })
             .state('review-item-edit', {
                 url: '/reviews/:id/edit',
-                views: getUICompObj('review-editor'),
+                data: {
+                    requireLogin: true,
+                    authorisedRoles: [USER_ROLES.ADMIN, USER_ROLES.EDITOR, USER_ROLES.REVIEWER]
+                },
+                views: getUICompObj('review-editor', undefined, undefined, {
+                    initData: function ($q, $stateParams, authservice, reviewservice, session) {
+                        var review = session.getCurrentReview();
+                        if (review == null || review.id != $stateParams.id) {
+                            var deferred = $q.defer();
+                            reviewservice.getById($stateParams.id)
+                                .then(getReviewSuccessful, getReviewFailed);
+                            return deferred.promise;
+                        } else {
+                            // check if the current user is the author
+                            if (authservice.belongsTo(review.author.id)) {
+                                return review;
+                            } else {
+                                return $q.reject({
+                                    code: 403,
+                                    message: 'No permission to edit the review.'
+                                });
+                            }
+                        }
+
+                        function getReviewSuccessful(result) {
+                            // check if the current user is the author
+                            if (authservice.belongsTo(result.author.id)) {
+                                deferred.resolve(result);
+                            } else {
+                                deferred.reject({
+                                    code: 403,
+                                    message: 'No permission to edit the review.'
+                                });
+                            }
+                        }
+
+                        function getReviewFailed(error) {
+                            return $q.reject({
+                                code: error.status,
+                                message: error.data.detail
+                            });
+                        }
+                    }
+                }),
             })
             .state('review-list', {
-                url: '/reviews',
-                views: getUICompObj('review-list'),
+                url: '/reviews?page',
+                data: {
+                    requireLogin: true,
+                    authorisedRoles: [USER_ROLES.ALL]
+                },
+                params: {search: null, type: null},
+                views: getUICompObj('review-list', undefined, undefined, {
+                    initData: function ($q, $stateParams, reviewservice, tagservice, session) {
+                        var page = typeof $stateParams.page !== 'undefined' ? $stateParams.page : 1;
+                        var pageSize = session.getPageSize();
+                        if($stateParams.search) {
+                          if($stateParams.type == 'title') {
+                            return reviewservice.searchByTitle($stateParams.search,
+                                (page - 1) * pageSize, pageSize)
+                                .then(getReviewListSuccessful, getReviewListFailed);
+                          } else if ($stateParams.type == 'keyword') {
+                            return reviewservice.searchByKeyword($stateParams.search,
+                                (page - 1) * pageSize, pageSize)
+                                .then(getReviewListSuccessful, getReviewListFailed);
+                          } else if ($stateParams.type == 'tag') {
+                            return reviewservice.searchByTag($stateParams.search,
+                                (page - 1) * pageSize, pageSize)
+                                .then(getReviewListSuccessful, getReviewListFailed);
+                          }
+                        } else {
+                            return reviewservice.getPage((page - 1) * pageSize, pageSize)
+                                .then(getReviewListSuccessful, getReviewListFailed);
+                        }
+
+                        function getReviewListSuccessful(result) {
+                            return $q.resolve(result);
+                        }
+
+                        function getReviewListFailed(error){
+                            return $q.reject({
+                                code: error.status,
+                                message: error.data.detail
+                            });
+                        }
+                    }
+                }),
+            })
+            .state('my-review-list', {
+                url: '/my-reviews?page',
+                data: {
+                    requireLogin: true,
+                    authorisedRoles: [USER_ROLES.ADMIN, USER_ROLES.EDITOR, USER_ROLES.REVIEWER]
+                },
+                params: {search: null, type: null},
+                views: getUICompObj('my-review-list', undefined, undefined, {
+                    initData: function ($q, $stateParams, reviewservice, session) {
+                        var page = typeof $stateParams.page !== 'undefined' ? $stateParams.page : 1;
+                        var pageSize = session.getPageSize();
+                        return reviewservice.getByReviewer(session.getCurrentUser().id)
+                                .then(getReviewListSuccessful, getReviewListFailed);
+
+                        function getReviewListSuccessful(result) {
+                            return $q.resolve(result);
+                        }
+
+                        function getReviewListFailed(error){
+                            return $q.reject({
+                                code: error.status,
+                                message: error.data.detail
+                            });
+                        }
+                    }
+                }),
             })
             .state('api-item-new', {
                 url: '/apis/new',
+                data: {
+                    requireLogin: true,
+                    authorisedRoles: [USER_ROLES.ADMIN, USER_ROLES.EDITOR, USER_ROLES.REVIEWER]
+                },
                 views: getUICompObj('api-editor'),
             })
             .state('api-item-view', {
                 url: '/apis/:id',
+                data: {
+                    requireLogin: true,
+                    authorisedRoles: [USER_ROLES.ALL]
+                },
                 views: getUICompObj('api', undefined, undefined, {
                     initData: function ($q, $state, $stateParams, apiservice) {
                         return apiservice.getById($stateParams.id)
@@ -121,8 +272,8 @@
 
                         function getApiFailed(error){
                             return $q.reject({
-                                code: 'NOT_FOUND',
-                                message: 'Failed to retrieve API.'
+                                code: error.status,
+                                message: error.data.detail
                             });
                         }
                     }
@@ -130,16 +281,31 @@
             })
             .state('api-item-edit', {
                 url: '/apis/:id/edit',
+                data: {
+                    requireLogin: true,
+                    authorisedRoles: [USER_ROLES.ADMIN, USER_ROLES.EDITOR]
+                },
                 views: getUICompObj('api-editor'),
             })
             .state('api-list', {
                 url: '/apis?page',
+                data: {
+                    requireLogin: true,
+                    authorisedRoles: [USER_ROLES.ALL]
+                },
+                params: {search: null},
                 views: getUICompObj('api-list', undefined, undefined, {
-                    initData: function ($stateParams, $q, apiservice, session) {
+                    initData: function ($q, $stateParams, apiservice, session) {
                         var page = typeof $stateParams.page !== 'undefined' ? $stateParams.page : 1;
                         var pageSize = session.getPageSize();
-                        return apiservice.getPage((page - 1) * pageSize, pageSize)
-                            .then(getApiListSuccessful, getApiListFailed);
+                        if($stateParams.search) {
+                            return apiservice.search($stateParams.search,
+                                (page - 1) * pageSize, pageSize)
+                                .then(getApiListSuccessful, getApiListFailed);
+                        } else {
+                            return apiservice.getPage((page - 1) * pageSize, pageSize)
+                                .then(getApiListSuccessful, getApiListFailed);
+                        }
 
                         function getApiListSuccessful(result) {
                             return $q.resolve(result);
@@ -147,32 +313,40 @@
 
                         function getApiListFailed(error){
                             return $q.reject({
-                                code: 'NOT_FOUND',
-                                message: 'Failed to retrieve APIs.'
+                                code: error.status,
+                                message: error.data.detail
                             });
                         }
                     }
                 }),
             })
-            .state('user-profile-edit', {
-                url: '/users/my-profile',
-                views: getUICompObj('user-profile-editor'),
-            })
+            // .state('user-profile-edit', {
+            //     url: '/users/my-profile',
+            //     data: {
+            //         requireLogin: true,
+            //         authorisedRoles: [USER_ROLES.ALL]
+            //     },
+            //     views: getUICompObj('user-profile-editor'),
+            // })
             .state('user-profile-view', {
                 url: '/users/:id',
+                data: {
+                    requireLogin: true,
+                    authorisedRoles: [USER_ROLES.ALL]
+                },
                 views: getUICompObj('user-profile', undefined, undefined, {
-                    initData: function ($q, $state, $stateParams, userservice) {
+                    initData: function ($q, $stateParams, userservice) {
                         return userservice.getById($stateParams.id)
-                            .then(getApiSuccessful, getApiFailed);
+                            .then(getUserSuccessful, getUserFailed);
 
-                        function getApiSuccessful(result) {
+                        function getUserSuccessful(result) {
                             return $q.resolve(result);
                         }
 
-                        function getApiFailed(error){
+                        function getUserFailed(error){
                             return $q.reject({
-                                code: 'NOT_FOUND',
-                                message: 'Failed to retrieve this User.'
+                                code: error.status,
+                                message: error.data.detail
                             });
                         }
                     }
@@ -180,12 +354,39 @@
             })
             .state('user-list', {
                 url: '/users?page',
+                data: {
+                    requireLogin: true,
+                    authorisedRoles: [USER_ROLES.ALL]
+                },
+                params: {search: null, type: null},
                 views: getUICompObj('user-list', undefined, undefined, {
                     initData: function ($stateParams, $q, userservice, session) {
                         var page = typeof $stateParams.page !== 'undefined' ? $stateParams.page : 1;
                         var pageSize = session.getPageSize();
-                        return userservice.getPage((page - 1) * pageSize, pageSize)
-                            .then(getUserListSuccessful, getUserListFailed);
+                        if ($stateParams.type == 'given_name') {
+                            return userservice.searchByGivenName($stateParams.search,
+                                (page - 1) * pageSize, pageSize)
+                                .then(getUserListSuccessful, getUserListFailed);
+                        } else if ($stateParams.type == 'surname') {
+                            return userservice.searchBySurname($stateParams.search,
+                              (page - 1) * pageSize, pageSize)
+                              .then(getUserListSuccessful, getUserListFailed);
+                        } else if ($stateParams.type == 'name') {
+                            return userservice.searchByName($stateParams.search,
+                              (page - 1) * pageSize, pageSize)
+                              .then(getUserListSuccessful, getUserListFailed);
+                        } else if ($stateParams.type == 'email') {
+                            return userservice.searchByEmail($stateParams.search,
+                              (page - 1) * pageSize, pageSize)
+                              .then(getUserListSuccessful, getUserListFailed);
+                        } else if ($stateParams.type == 'role') {
+                            return userservice.searchByRole($stateParams.search,
+                                (page - 1) * pageSize, pageSize)
+                                .then(getUserListSuccessful, getUserListFailed);
+                        } else {
+                            return userservice.getPage((page - 1) * pageSize, pageSize)
+                                .then(getUserListSuccessful, getUserListFailed);
+                        }
 
                         function getUserListSuccessful(result) {
                             return $q.resolve(result);
@@ -193,22 +394,51 @@
 
                         function getUserListFailed(error){
                             return $q.reject({
-                                code: 'NOT_FOUND',
-                                message: 'Failed to retrieve users.'
+                                code: error.status,
+                                message: error.data.detail
                             });
                         }
                     }
                 }),
             })
+            .state('search', {
+              url: '/search',
+              data: {
+                requireLogin: false
+              },
+              views: getUICompObj('search')
+            })
+            .state('admin-console', {
+                url: '/admin-console',
+                data: {
+                    requireLogin: true,
+                    authorisedRoles: [USER_ROLES.ADMIN]
+                },
+                views: getUICompObj('admin-console'),
+            })
             .state('error', {
                 url: '/error',
-                views: getUICompObj('login'),
+                data: {
+                    requireLogin: false
+                },
+                params: { type: null },
+                views: getUICompObj('error'),
+            })
+            .state('test', {
+                url: '/test',
+                data: {
+                    requireLogin: false
+                },
+                views: getUICompObj('test'),
             });
     }
 
     function urlConfig($urlRouterProvider) {
-        $urlRouterProvider.otherwise('/');
+        $urlRouterProvider
+            .when('', '/')
+            .otherwise('/error');
     }
 
+    /** @ngInject */
     function AppController () {}
 })();
